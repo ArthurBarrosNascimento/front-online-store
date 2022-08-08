@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { getProductsFromCategoryAndQuery } from '../services/api';
+import FilterCategories from './FilterCategories';
 
 class Home extends Component {
   state = {
@@ -61,6 +62,7 @@ class Home extends Component {
         <section>
           { productsList }
         </section>
+        <FilterCategories />
       </main>
     );
   }
