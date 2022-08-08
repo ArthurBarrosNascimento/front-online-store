@@ -9,7 +9,7 @@ export async function getCategories() {
 
 export async function getProductsFromCategoryAndQuery(categorieId, query) {
   // Implemente aqui! Quando o fizer, descomente os parâmetros que essa função recebe
-  const url = `https://api.mercadolibre.com/sites/MLB/search?category=${categorieId}_ID&q=${query}`;
+  const url = `https://api.mercadolibre.com/sites/MLB/search?category=${categorieId}&q=${query}`;
   const urlFetch = await fetch(url);
   const response = await urlFetch.json();
 
