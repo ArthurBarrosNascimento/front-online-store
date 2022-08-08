@@ -2,39 +2,56 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { getProductsFromCategoryAndQuery } from '../services/api';
 import FilterCategories from './FilterCategories';
+import ProductCard from './ProductCard';
+
+const NOT_FOUND = 'Nenhum produto foi encontrado';
 
 class Home extends Component {
   state = {
     searchInput: '',
     productsFound: [],
+    categoryId: '',
   }
 
   handleChange = ({ target }) => {
     const { name, type, value } = target;
     const targetValue = type !== 'checkbox' ? value : target.checked;
-    this.setState({ [name]: targetValue });
+    this.setState({ [name]: targetValue }, this.produtcsFromCaterogy);
   }
 
   searchProduct = async () => {
     const { searchInput } = this.state;
 
     const requestProduct = await getProductsFromCategoryAndQuery('', searchInput);
+
     const checkIfProductExists = requestProduct.results.length !== 0
-      ? requestProduct.results : 'Nenhum produto foi encontrado';
-    this.setState({ productsFound: checkIfProductExists });
+      ? requestProduct.results : NOT_FOUND;
+    this.setState({
+      productsFound: checkIfProductExists,
+      searchInput: '',
+    });
+  }
+
+  produtcsFromCaterogy = async () => {
+    const { categoryId } = this.state;
+
+    const requestProduct = await getProductsFromCategoryAndQuery(categoryId, '');
+
+    this.setState({ productsFound: requestProduct.results });
   }
 
   render() {
-    const { searchInput, productsFound } = this.state;
+    const { searchInput, productsFound, categoryId } = this.state;
 
     const productsList = !Array.isArray(productsFound)
-      ? (<div>Nenhum produto foi encontrado</div>) : (
+      ? (<div>{ NOT_FOUND }</div>) : (
         productsFound.map(({ price, title, thumbnail, id }) => (
-          <div data-testid="product" key={ id }>
-            <h2>{ title }</h2>
-            <img src={ thumbnail } alt={ title } />
-            <p>{ price }</p>
-          </div>
+          <ProductCard
+            key={ id }
+            price={ price }
+            title={ title }
+            thumbnail={ thumbnail }
+          />
         ))
       );
 
@@ -62,7 +79,10 @@ class Home extends Component {
         <section>
           { productsList }
         </section>
-        <FilterCategories />
+        <FilterCategories
+          categoryId={ categoryId }
+          handleChange={ this.handleChange }
+        />
       </main>
     );
   }
