@@ -2,39 +2,45 @@ import React, { Component } from 'react';
 
 class Cart extends Component {
   state = {
-    cartProducts: JSON.parse(localStorage.getItem('cartProducts')),
-    quantyProducts: 0,
+    cartProducts: [],
+    cartQuantity: 0,
   }
 
   componentDidMount() {
-    const { cartProducts } = this.state;
+    this.getProductsFromStorage();
+    if (localStorage.length === 0) localStorage.setItem('cartProducts', []);
+  }
+
+  getProductsFromStorage = () => {
+    const localStorageProducts = JSON.parse(localStorage.getItem('cartProducts'));
+    const localStorageVerify = !localStorageProducts ? [] : localStorageProducts;
+    const quantity = !localStorageProducts ? 0 : localStorageProducts.length;
     this.setState({
-      quantyProducts: cartProducts.length,
+      cartProducts: localStorageVerify,
+      cartQuantity: quantity,
     });
   }
 
   render() {
-    const { cartProducts, quantyProducts } = this.state;
-    const productsList = cartProducts.map((
-      { price, title }, index,
-    ) => (
+    const { cartProducts, cartQuantity } = this.state;
+
+    const productsList = cartProducts.map(({ title, price }, index) => (
       <div key={ index }>
-        <h2 data-testid="shopping-cart-product-name">{ title }</h2>
-        <h2>{ price }</h2>
+        <h3 data-testid="shopping-cart-product-name">{ title }</h3>
+        <p>{ price }</p>
       </div>
     ));
+
     return (
       <main>
-        {!cartProducts.length
-          ? (
-            <h1 data-testid="shopping-cart-empty-message">Seu carrinho está vazio</h1>
-          )
-          : (
-            <div>
-              { productsList }
-              <h2 data-testid="shopping-cart-product-quantity">{ quantyProducts }</h2>
-            </div>
-          )}
+        { cartProducts.length === 0 ? (
+          <h1 data-testid="shopping-cart-empty-message">Seu carrinho está vazio</h1>
+        ) : (
+          <div>
+            <h4 data-testid="shopping-cart-product-quantity">{ cartQuantity }</h4>
+            { productsList }
+          </div>
+        )}
       </main>
     );
   }
