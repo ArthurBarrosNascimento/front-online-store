@@ -51,6 +51,7 @@ class Home extends Component {
             price={ price }
             title={ title }
             thumbnail={ thumbnail }
+            productId={ id }
           />
         ))
       );
