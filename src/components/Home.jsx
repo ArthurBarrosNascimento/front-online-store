@@ -11,6 +11,7 @@ class Home extends Component {
     searchInput: '',
     productsFound: [],
     categoryId: '',
+    cartProducts: [],
   }
 
   handleChange = ({ target }) => {
@@ -40,19 +41,36 @@ class Home extends Component {
     this.setState({ productsFound: requestProduct.results });
   }
 
+  saveOnLocalStorage = (product) => {
+    this.setState(({ cartProducts }) => (
+      { cartProducts: [...cartProducts, product] }
+    ), () => {
+      const { cartProducts } = this.state;
+      localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
+    });
+  }
+
   render() {
     const { searchInput, productsFound, categoryId } = this.state;
 
     const productsList = !Array.isArray(productsFound)
       ? (<div>{ NOT_FOUND }</div>) : (
         productsFound.map(({ price, title, thumbnail, id }) => (
-          <ProductCard
-            key={ id }
-            price={ price }
-            title={ title }
-            thumbnail={ thumbnail }
-            productId={ id }
-          />
+          <div key={ id }>
+            <ProductCard
+              price={ price }
+              title={ title }
+              thumbnail={ thumbnail }
+              productId={ id }
+            />
+            <button
+              type="button"
+              data-testid="product-add-to-cart"
+              onClick={ () => this.saveOnLocalStorage({ price, title }) }
+            >
+              Adicionar ao Carrinho
+            </button>
+          </div>
         ))
       );
 
