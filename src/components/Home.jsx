@@ -42,12 +42,29 @@ class Home extends Component {
   }
 
   saveOnLocalStorage = (product) => {
-    this.setState(({ cartProducts }) => (
-      { cartProducts: [...cartProducts, product] }
-    ), () => {
-      const { cartProducts } = this.state;
-      localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
-    });
+    const xablau = { ...product, quantity: 1 };
+    const { cartProducts } = this.state;
+    const teste = cartProducts.some((cartProduct) => cartProduct.id === product.id);
+    if (teste) {
+      const newCart = cartProducts.map((produto) => {
+        if (produto.id === xablau.id) {
+          return { ...produto, quantity: produto.quantity + 1 };
+        }
+        return produto;
+      });
+
+      this.setState({ cartProducts: newCart }, () => {
+        const { cartProducts: newCartProducts } = this.state;
+        localStorage.setItem('cartProducts', JSON.stringify(newCartProducts));
+      });
+    } else {
+      this.setState(() => (
+        { cartProducts: [...cartProducts, xablau] }
+      ), () => {
+        const { cartProducts: newCartProducts } = this.state;
+        localStorage.setItem('cartProducts', JSON.stringify(newCartProducts));
+      });
+    }
   }
 
   render() {
@@ -66,9 +83,9 @@ class Home extends Component {
             <button
               type="button"
               data-testid="product-add-to-cart"
-              onClick={ () => this.saveOnLocalStorage({ price, title }) }
+              onClick={ () => this.saveOnLocalStorage({ title, price, id }) }
             >
-              Adicionar ao Carrinho
+              Salvar no carrinho
             </button>
           </div>
         ))
