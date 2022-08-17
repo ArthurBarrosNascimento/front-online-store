@@ -41,29 +41,29 @@ class Home extends Component {
     this.setState({ productsFound: requestProduct.results });
   }
 
+  setOnState = (newState) => {
+    this.setState({ cartProducts: newState }, () => {
+      const { cartProducts: newCartProducts } = this.state;
+      localStorage.setItem('cartProducts', JSON.stringify(newCartProducts));
+    });
+  }
+
   saveOnLocalStorage = (product) => {
-    const xablau = { ...product, quantity: 1 };
+    const newProductObj = { ...product, quantity: 1 };
     const { cartProducts } = this.state;
-    const teste = cartProducts.some((cartProduct) => cartProduct.id === product.id);
-    if (teste) {
+    const checkIfHasProduct = cartProducts
+      .some((cartProduct) => cartProduct.id === product.id);
+    if (checkIfHasProduct) {
       const newCart = cartProducts.map((produto) => {
-        if (produto.id === xablau.id) {
+        if (produto.id === newProductObj.id) {
           return { ...produto, quantity: produto.quantity + 1 };
         }
         return produto;
       });
 
-      this.setState({ cartProducts: newCart }, () => {
-        const { cartProducts: newCartProducts } = this.state;
-        localStorage.setItem('cartProducts', JSON.stringify(newCartProducts));
-      });
+      this.setOnState(newCart);
     } else {
-      this.setState(() => (
-        { cartProducts: [...cartProducts, xablau] }
-      ), () => {
-        const { cartProducts: newCartProducts } = this.state;
-        localStorage.setItem('cartProducts', JSON.stringify(newCartProducts));
-      });
+      this.setOnState([...cartProducts, newProductObj]);
     }
   }
 
