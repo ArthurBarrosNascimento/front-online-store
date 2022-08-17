@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { getProductFromId } from '../services/api';
+import FormProductDetailed from './FormProductDetailed';
 
 export default class ProductDetailed extends Component {
   state = {
@@ -13,50 +14,46 @@ export default class ProductDetailed extends Component {
     this.productClicked();
   }
 
-  getLocalStorage = () => {
-    const localStorageProducts = JSON.parse(localStorage.getItem('cartProducts'));
-    const localStorageVerify = !localStorageProducts ? [] : localStorageProducts;
-    this.setState({ cartProducts: localStorageVerify }, () => {
-      const { cartProducts } = this.state;
-      localStorage.setItem('cartProducts', cartProducts);
-    });
-  }
-
   productClicked = async () => {
     const { match: { params: { id } } } = this.props;
     const APIrequest = await getProductFromId(id);
+    const localStorageProducts = JSON.parse(localStorage.getItem('cartProducts'));
+    if (localStorageProducts) {
+      this.setState({ cartProducts: localStorageProducts });
+    }
     this.setState({ product: APIrequest });
   }
 
+  setOnState = (newState) => {
+    this.setState({ cartProducts: newState }, () => {
+      const { cartProducts: newCartProducts } = this.state;
+      localStorage.setItem('cartProducts', JSON.stringify(newCartProducts));
+    });
+  }
+
   saveOnLocalStorage = (product) => {
-    const xablau = { ...product, quantity: 1 };
+    const newProduct = { ...product, quantity: 1 };
     const { cartProducts } = this.state;
-    const teste = cartProducts.some((cartProduct) => cartProduct.id === product.id);
-    if (teste) {
+    const searchProduct = cartProducts.some(({ id }) => id === product.id);
+    if (searchProduct) {
       const newCart = cartProducts.map((produto) => {
-        if (produto.id === xablau.id) {
+        if (produto.id === newProduct.id) {
           return { ...produto, quantity: produto.quantity + 1 };
         }
         return produto;
       });
 
-      this.setState({ cartProducts: newCart }, () => {
-        const { cartProducts: newCartProducts } = this.state;
-        localStorage.setItem('cartProducts', JSON.stringify(newCartProducts));
-      });
+      this.setOnState(newCart);
     } else {
-      this.setState(() => (
-        { cartProducts: [...cartProducts, xablau] }
-      ), () => {
-        const { cartProducts: newCartProducts } = this.state;
-        localStorage.setItem('cartProducts', JSON.stringify(newCartProducts));
-      });
+      this.setOnState([...cartProducts, newProduct]);
     }
   }
 
   render() {
     const { product } = this.state;
     const { title, thumbnail, price } = product;
+    const { match: { params: { id } } } = this.props;
+
     return (
       <div>
         <h2 data-testid="product-detail-name">{ title }</h2>
@@ -72,6 +69,9 @@ export default class ProductDetailed extends Component {
             Adicionar ao carrinho
           </button>
         </div>
+        <section>
+          <FormProductDetailed id={ id } />
+        </section>
       </div>
     );
   }
